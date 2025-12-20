@@ -4,6 +4,10 @@ const cors = require('cors');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
+// This tells the server what to do when someone opens the homepage
+app.get('/', (req, res) => {
+    res.status(200).send({ message: 'Hello! The server is running successfully.' });
+});
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Allows big images
 
@@ -33,4 +37,5 @@ app.post('/ask-ai', async (req, res) => {
 
 
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+
 
