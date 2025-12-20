@@ -1,20 +1,31 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // [1] IMPORT PATH MODULE
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
-// This tells the server what to do when someone opens the homepage
-app.get('/', (req, res) => {
-    res.status(200).send({ message: 'Hello! The server is running successfully.' });
-});
-app.use(cors());
-app.use(express.json({ limit: '10mb' })); // Allows big images
 
-// Connect to Google using the hidden key
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+// [2] SERVE STATIC FILES
+// This line allows the server to send index.html and any other files (css, js)
+// located in the same directory.
+app.use(express.static(__dirname));
+
+// [3] UPDATED HOME ROUTE
+// When someone opens the home page, send them the index.html file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Connect to Google
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-// Using 'gemini-1.5-flash' because '2.5' is not fully released yet
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+// Note: Ensure this model name is correct. Currently "gemini-1.5-flash" is the standard.
+// If "2.5" gives you an error, switch it back to "1.5".
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 app.post('/ask-ai', async (req, res) => {
     try {
@@ -35,7 +46,7 @@ app.post('/ask-ai', async (req, res) => {
     }
 });
 
-
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
-
-
+// [4] DYNAMIC PORT FOR RENDER
+// Render assigns a specific port, so we must use process.env.PORT
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
