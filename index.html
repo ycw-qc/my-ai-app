@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elderly Care Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for accessibility and large touch targets */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --btn-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            padding-bottom: 120px; /* Space for tab bar */
+            font-size: 18px;
+        }
+        .container {
+            max-width: 768px;
+            margin: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+        }
+        
+        /* Scrollable Tab Bar */
+        .tab-bar {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 2rem 2rem 0 0;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            justify-content: space-around;
+            max-width: 768px;
+            margin: 0 auto;
+            border-top: 4px solid #e2e8f0;
+        }
+        .tab-button {
+            padding: 0.5rem 0;
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: 800;
+            transition: all 0.2s;
+            border-radius: 1rem;
+            color: #94a3b8;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            border: none;
+        }
+        .tab-button i {
+            font-size: 2rem; 
+            margin-bottom: 4px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        }
+        .tab-button.active {
+            color: #4f46e5;
+            transform: translateY(-5px);
+        }
+
+        /* Views Animation */
+        .view-section {
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+        .view-section.active {
+            display: block;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border: 1px solid #f1f5f9;
+        }
+        
+        /* Inputs & Buttons */
+        input[type="text"], input[type="date"], input[type="tel"], input[type="time"], input[type="password"], button:not(.tab-button):not(.menu-item), textarea, select {
+            min-height: 4.5rem;
+            font-size: 1.3rem;
+            border-radius: 1rem;
+            border: 3px solid #cbd5e1;
+            padding: 0.75rem 1.25rem;
+            width: 100%;
+            margin-bottom: 1.25rem;
+            background-color: #f8fafc;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Youtube-style Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+            height: 20px; /* larger touch area */
+            margin: 0;
+        }
+        /* Track */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+        }
+        /* Thumb */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #dc2626; /* Red */
+            margin-top: -6px; /* center on track */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        input[type=range]:active::-webkit-slider-thumb {
+            transform: scale(1.3);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            font-weight: 700;
+            box-shadow: var(--btn-shadow);
+            transition: transform 0.1s;
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        
+        .btn-secondary {
+            background-color: white;
+            color: #334155;
+            border: 3px solid #cbd5e1;
+            font-weight: 700;
+        }
+        
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+        <button id="record-btn" onclick="toggleRecord()" ... >
+    Start Recording
+</button>
+
+<button onclick="analyzeNote()" class="w-full py-4 rounded-2xl mb-4 text-xl font-bold text-white shadow-lg" style="background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%);">
+    <i class="fas fa-magic mr-2"></i> Summarize My Note
+</button>
+
+<textarea id="notes-summary-output" class="w-full h-40 p-4 rounded-xl border-2 border-slate-200 text-slate-700 text-lg focus:border-blue-500 focus:ring-0 resize-none mb-4" placeholder="AI Summary will appear here..."></textarea>
+        /* Changed from div to button for better click handling */
+        button.menu-item {
+            padding: 2rem 1rem;
+            border-radius: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15); 
+            transition: transform 0.2s;
+            cursor: pointer;
+            border-width: 0px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 0.5rem;
+            width: 100%;
+            appearance: none;
+        }
+        button.menu-item:active { transform: scale(0.95); }
+        .menu-icon {
+            font-size: 4.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); 
+        }
+        
+        /* Video */
+        #video-container {
+            position: relative;
+            border-radius: 2rem;
+            overflow: hidden;
+            background: black;
+            margin-bottom: 1.5rem;
+            border: 4px solid #334155;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        #video-feed { width: 100%; height: auto; display: block; }
+        .scan-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; height: 60%; border: 4px dashed rgba(255,255,255,0.9);
+            border-radius: 1.5rem; pointer-events: none; box-shadow: 0 0 0 999px rgba(0,0,0,0.6);
+            transition: border-color 0.3s;
+        }
+        .instruction-badge {
+            position: absolute; top: 1rem; left: 50%; transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.7); color: white; padding: 0.5rem 1.5rem;
+            border-radius: 999px; font-weight: bold; font-size: 1.1rem;
+            border: 2px solid white; pointer-events: none;
+        }
+        
+        /* Category Badge Styles */
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Utility */
+        h2 { font-size: 2rem !important; color: #1e293b; }
+        label { font-size: 1.1rem !important; color: #475569; margin-bottom: 0.5rem; display: block; }
+        .spinner {
+            border: 5px solid rgba(0, 0, 0, 0.1); width: 48px; height: 48px; border-radius: 50%;
+            border-left-color: #4f46e5; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-b-3xl shadow-lg mb-6 flex justify-between items-center sticky top-0 z-40">
+        <div>
+            <h1 class="text-3xl font-extrabold text-white tracking-wide">Care Assistant</h1>
+            <p id="user-id-display" class="text-base text-indigo-100 font-medium opacity-80 mt-1">Connecting...</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto pb-32">
+        
+        <!-- VIEW: MENU (HOME) -->
+        <div id="view-menu" class="view-section active">
+            <div class="menu-grid">
+                <button onclick="switchTab('medicine')" class="menu-item bg-red-600 text-white col-span-2 shadow-red-200">
+                    <i class="fas fa-capsules menu-icon text-white/90"></i>
+                    <span class="font-extrabold text-3xl">Medicine ID</span>
+                </button>
+                <button onclick="switchTab('notes')" class="menu-item bg-amber-500 text-white shadow-amber-200">
+                    <i class="fas fa-microphone-alt menu-icon text-white/90"></i>
+                    <span class="font-extrabold text-3xl">Voice Notes</span>
+                </button>
+                <button onclick="switchTab('transport')" class="menu-item bg-teal-600 text-white shadow-teal-200">
+                    <i class="fas fa-bus menu-icon text-white/90"></i>
+                    <span class="font-extrabold text-3xl">Transport & Taxi</span>
+                </button>
+                <button onclick="switchTab('contacts')" class="menu-item bg-blue-600 text-white shadow-blue-200">
+                    <i class="fas fa-address-book menu-icon text-white/90"></i>
+                    <span class="font-extrabold text-3xl">Contacts</span>
+                </button>
+                <button onclick="switchTab('reminders')" class="menu-item bg-indigo-600 text-white shadow-indigo-200">
+                    <i class="fas fa-bell menu-icon text-white/90"></i>
+                    <span class="font-extrabold text-3xl">Reminders</span>
+                </button>
+            </div>
+            
+            <div class="content-card mt-8 bg-purple-50 border-purple-300 border-4">
+                <h3 class="font-bold text-2xl mb-4 text-purple-900 flex items-center"><i class="fas fa-smile text-purple-700 mr-3 text-4xl"></i> How do you feel?</h3>
+                <div class="grid grid-cols-4 gap-2 mb-2">
+                    <button onclick="getMoodTip('happy')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Happy">😊</button>
+                    <button onclick="getMoodTip('excited')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Excited">🤩</button>
+                    <button onclick="getMoodTip('silly')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Silly">😜</button>
+                    <button onclick="getMoodTip('cool')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Cool">😎</button>
+                    <button onclick="getMoodTip('calm')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Calm">😌</button>
+                    <button onclick="getMoodTip('grateful')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Grateful">🥰</button>
+                    <button onclick="getMoodTip('loved')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Loved">😍</button>
+                    <button onclick="getMoodTip('thinking')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Thinking">🤔</button>
+                    <button onclick="getMoodTip('tired')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Tired">😴</button>
+                    <button onclick="getMoodTip('confused')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Confused">😕</button>
+                    <button onclick="getMoodTip('surprised')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Surprised">😮</button>
+                    <button onclick="getMoodTip('sick')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Sick">🤒</button>
+                    <button onclick="getMoodTip('anxious')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Anxious">😟</button>
+                    <button onclick="getMoodTip('sad')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Sad">😢</button>
+                    <button onclick="getMoodTip('angry')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Angry">😠</button>
+                    <button onclick="getMoodTip('frustrated')" class="aspect-square rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 flex items-center justify-center leading-none overflow-hidden shadow-sm active:scale-95 transition-all p-0" style="font-size: 140px;" title="Frustrated">😤</button>
+                </div>
+                <p class="text-center text-gray-500 text-lg font-medium mb-2">Tap a face for advice</p>
+                <div id="mood-result" class="mt-4 text-purple-900 font-bold text-xl leading-relaxed bg-white p-4 rounded-xl border border-purple-100 shadow-sm min-h-[4rem]"></div>
+            </div>
+        </div>
+
+        <!-- VIEW: NOTES -->
+        <div id="view-notes" class="view-section">
+            <h2 class="text-3xl font-extrabold mb-6 px-2 text-yellow-900">Doctor's Notes</h2>
+            <div class="content-card border-yellow-200 border-2">
+                <label class="font-bold text-gray-600">Location / Doctor</label>
+                <input type="text" id="notes-input-location" placeholder="e.g. Dr. Smith">
+                
+                <label class="font-bold text-gray-600 mt-2">Voice Language</label>
+                <select id="notes-lang-select" class="mb-4">
+                    <option value="en-US">English</option>
+                    <option value="zh-HK">Cantonese</option>
+                    <option value="zh-CN">Mandarin</option>
+                </select>
+
+                <label class="font-bold text-gray-600 mt-2">Recording</label>
+                <button id="record-btn" onclick="toggleRecord()" class="btn-primary w-full py-5 rounded-2xl mb-5 text-xl flex items-center justify-center gap-3">
+                    <i class="fas fa-microphone text-3xl"></i> Start Recording
+                </button>
+                
+                <!-- Hidden raw text area, used for logic but not display -->
+                <textarea id="notes-text-output" rows="4" class="hidden"></textarea>
+                
+                <label class="font-bold text-gray-600">Live Note / Analysis</label>
+                <textarea id="notes-summary-output" rows="5" placeholder="Your note will appear here as you speak..." readonly class="bg-gray-50"></textarea>
+                
+                <button id="btn-save-note" onclick="saveNote()" class="btn-primary w-full mt-6 py-4 rounded-2xl text-xl">Save Note</button>
+            </div>
+            <h3 class="font-bold text-gray-500 px-2 mb-3 text-xl">History</h3>
+            <div id="saved-notes-list"></div>
+        </div>
+
+        <!-- VIEW: MEDICINE (AI VISION DUAL SCAN) -->
+        <div id="view-medicine" class="view-section">
+            <h2 class="text-3xl font-extrabold mb-6 px-2 text-red-900">Medicine Scanner</h2>
+            <div class="content-card border-red-200 border-2">
+                <div id="video-container" class="hidden relative aspect-[4/3] mb-4">
+                    <video id="video-feed" autoplay playsinline muted></video>
+                    <div id="scan-overlay-box" class="scan-overlay border-white"></div>
+                    <div id="scan-instruction-text" class="instruction-badge">Scan Label</div>
+                </div>
+                
+                <div id="scan-status" class="hidden text-center p-4 bg-yellow-50 text-yellow-800 rounded-xl mb-4 font-bold border border-yellow-200">
+                    <i class="fas fa-spinner fa-spin mr-2"></i> Analyzing Images...
+                </div>
+
+                <!-- Capture Buttons Area -->
+                <div id="scan-controls">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <!-- Label Preview Box -->
+                        <div class="flex flex-col gap-2">
+                            <div id="preview-label" class="bg-gray-100 rounded-xl h-40 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative">
+                                <span class="text-gray-400 font-bold text-center p-2"><i class="fas fa-file-alt text-3xl mb-1 block"></i>Label</span>
+                            </div>
+                            <!-- Manual button just in case -->
+                            <button onclick="startCam('label')" class="btn-secondary py-3 rounded-xl font-bold text-sm bg-red-50 text-red-700 border-red-200">
+                                <i class="fas fa-camera mr-1"></i> Retake Label
+                            </button>
+                        </div>
+                        
+                        <!-- Appearance Preview Box -->
+                        <div class="flex flex-col gap-2">
+                            <div id="preview-appearance" class="bg-gray-100 rounded-xl h-40 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative">
+                                <span class="text-gray-400 font-bold text-center p-2"><i class="fas fa-pills text-3xl mb-1 block"></i>Pill/Look</span>
+                            </div>
+                            <!-- Manual button just in case -->
+                            <button onclick="startCam('appearance')" class="btn-secondary py-3 rounded-xl font-bold text-sm bg-red-50 text-red-700 border-red-200">
+                                <i class="fas fa-camera mr-1"></i> Retake Look
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Start/Capture Buttons -->
+                <button id="start-camera-btn" onclick="startCam('label')" class="btn-primary w-full py-5 rounded-2xl text-xl mb-5 bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center gap-3">
+                    <i class="fas fa-camera text-3xl"></i> Scan Bottle
+                </button>
+
+                <button id="capture-btn" onclick="captureScan()" class="bg-red-600 text-white w-full py-5 rounded-2xl text-xl mb-5 hidden font-bold shadow-lg flex items-center justify-center gap-3">
+                    <i class="fas fa-shutter text-3xl"></i> Capture Photo
+                </button>
+
+                <!-- Analyze Button (Hidden by default, used if auto-flow fails or manual usage) -->
+                <button onclick="analyzeDualImages()" id="analyze-btn" class="hidden btn-primary w-full py-5 rounded-2xl text-xl mb-5 bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center gap-3">
+                    <i class="fas fa-magic text-3xl"></i> Analyze Now
+                </button>
+                
+                <input type="hidden" id="ocr-category-input">
+                <div id="ocr-category-display" class="hidden"></div>
+
+                <label class="font-bold text-gray-600">Medicine Name</label>
+                <textarea id="ocr-output" rows="2" placeholder="Detected name will appear here..." class="mb-4"></textarea>
+                
+                <label class="font-bold text-gray-600">Explanation</label>
+                <textarea id="ocr-summary-output" rows="4" placeholder="AI Explanation..." readonly class="bg-gray-50 mb-6"></textarea>
+                
+                <div class="flex gap-3">
+                    <button id="btn-save-scan" onclick="saveScan()" class="flex-[2] btn-secondary py-4 rounded-2xl font-bold text-xl border-red-300 text-red-800 shadow-sm">Save Info</button>
+                    <button onclick="clearScan()" class="flex-1 bg-white border-2 border-gray-300 text-gray-500 py-4 rounded-2xl font-bold text-xl shadow-sm hover:bg-gray-50">Discard</button>
+                </div>
+            </div>
+            <h3 class="font-bold text-gray-500 px-2 mb-3 text-xl">Saved Meds</h3>
+            <div id="saved-medicine-list"></div>
+        </div>
+
+        <!-- VIEW: CONTACTS -->
+        <div id="view-contacts" class="view-section">
+            <h2 class="text-3xl font-extrabold mb-6 px-2 text-blue-900">Contacts</h2>
+            <div class="content-card border-blue-200 border-2">
+                <input type="text" id="c-name" placeholder="Name (e.g. Dr. Jones)">
+                <input type="text" id="c-role" placeholder="Role (e.g. Cardiologist)">
+                <input type="tel" id="c-phone" placeholder="Phone Number">
+                
+                <div class="flex gap-2 mt-4">
+                    <button id="btn-save-contact" onclick="addContact()" class="btn-primary flex-1 py-4 rounded-2xl text-xl bg-gradient-to-r from-blue-500 to-cyan-500">Add Contact</button>
+                    <button id="btn-cancel-contact" onclick="cancelEditContact()" class="hidden w-24 py-4 rounded-2xl text-lg bg-gray-200 text-gray-600 font-bold">Cancel</button>
+                </div>
+            </div>
+            <div id="contacts-list"></div>
+        </div>
+
+        <!-- VIEW: REMINDERS -->
+        <div id="view-reminders" class="view-section">
+            <h2 class="text-3xl font-extrabold mb-6 px-2 text-indigo-900">Reminders</h2>
+            <div class="content-card border-indigo-200 border-2">
+                <input type="text" id="r-name" placeholder="Medication Name">
+                <input type="time" id="r-time">
+                <button onclick="addReminder()" class="btn-primary w-full mt-4 py-4 rounded-2xl text-xl">Set Reminder</button>
+            </div>
+            <div id="reminders-list"></div>
+        </div>
+
+        <!-- NEW: VIEW TRANSPORT -->
+        <div id="view-transport" class="view-section">
+            <h2 class="text-3xl font-extrabold mb-6 px-2 text-teal-900">Transport</h2>
+            <div class="content-card border-teal-200 border-2">
+                <label class="font-bold text-gray-600">Destination</label>
+                <input type="text" id="transport-dest" placeholder="e.g. City Hospital">
+                
+                <button onclick="openTransport()" class="btn-primary w-full py-5 rounded-2xl mb-5 text-xl bg-gradient-to-r from-teal-500 to-emerald-500 shadow-teal-200 flex items-center justify-center gap-3">
+                    <i class="fas fa-map-marked-alt text-3xl"></i> Find Bus / Train
+                </button>
+                
+                <button onclick="openUber()" class="btn-primary w-full py-5 rounded-2xl text-xl bg-black text-white shadow-gray-400 flex items-center justify-center gap-3">
+                    <i class="fab fa-uber text-3xl"></i> Call Taxi (Uber)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TAB BAR -->
+    <nav class="tab-bar">
+        <button class="tab-button active" onclick="switchTab('menu')" id="tab-menu">
+            <i class="fas fa-home"></i> Home
+        </button>
+        <button class="tab-button" onclick="switchTab('notes')" id="tab-notes">
+            <i class="fas fa-microphone"></i> Notes
+        </button>
+        <button class="tab-button" onclick="switchTab('medicine')" id="tab-medicine">
+            <i class="fas fa-pills"></i> Meds
+        </button>
+        <button class="tab-button" onclick="switchTab('contacts')" id="tab-contacts">
+            <i class="fas fa-phone"></i> Contacts
+        </button>
+        <button class="tab-button" onclick="switchTab('transport')" id="tab-transport">
+            <i class="fas fa-bus"></i> Travel
+        </button>
+    </nav>
+
+    <!-- CONFIRM MODAL -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center border-4 border-red-100">
+            <div class="text-red-500 mb-6"><i class="fas fa-exclamation-circle text-6xl"></i></div>
+            <h3 class="text-2xl font-extrabold mb-3 text-gray-800">Delete this item?</h3>
+            <p class="text-gray-500 text-lg mb-8">This cannot be undone.</p>
+            <div class="flex gap-4">
+                <button onclick="executeDelete()" class="flex-1 bg-red-500 text-white py-4 rounded-2xl font-bold text-lg shadow-lg">Delete</button>
+                <button onclick="closeModal('confirm-modal')" class="flex-1 bg-gray-100 text-gray-700 py-4 rounded-2xl font-bold text-lg border-2 border-gray-200">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERT MODAL -->
+    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center border-4 border-indigo-100">
+            <div id="alert-msg" class="text-xl font-bold text-gray-800 mb-8 leading-relaxed"></div>
+            <button onclick="closeModal('alert-modal')" class="btn-primary w-full py-4 rounded-2xl font-bold text-xl">OK</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- API KEY CONFIGURATION ---
+
+
+        // CONFIGURATION
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'elderly-care-app-default';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth, userId = 'guest';
+
+        // GLOBAL STATE
+        window.AppState = {
+            db: null, userId: null,
+            notes: [], medicineScans: [], contacts: [], reminders: [],
+            geminiApiKey: localStorage.getItem('gemini_api_key') || "",
+            
+            // Recorders
+            isRecording: false,
+            recognition: null, // text
+            mediaRecorder: null, // audio
+            audioChunks: [],
+            currentAudioBase64: null,
+
+            currentLabelImg: null,     // State for Label Image
+            currentAppearanceImg: null, // State for Appearance Image
+            scanningType: null,        // 'label' or 'appearance'
+            editingContactId: null,
+            
+            // Player State (Unified)
+            currentSpeechId: null,
+            playerMode: null, // 'tts' or 'audio'
+            speechText: null, // for tts
+            speechUtterance: null, // for tts
+            audioElem: null, // for audio file
+            speechCharIndex: 0,
+            isDragging: false // Track if user is scrubbing
+        };
+
+
+        
+        // --- SECURE BRIDGE TO NODE.JS ---
+    // This talks to your server.js instead of Google directly
+async function askBackendAI(promptText, imageFile = null) {
+        // REPLACE WITH YOUR RENDER URL
+        const url = 'https://my-ai-app-wjv0.onrender.com/ask-ai'; 
+
+        let payload = { prompt: promptText, imageBase64: null };
+
+        if (imageFile) {
+            try {
+                payload.imageBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result.split(',')[1]); 
+                    reader.readAsDataURL(imageFile);
+                });
+            } catch (e) { return "Image Error"; }
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                // This gets the actual error from the server (e.g. 404, 500)
+                const errorData = await response.json(); 
+                throw new Error(errorData.error || response.statusText);
+            }
+            
+            const data = await response.json();
+            return data.response; 
+        } catch (error) {
+            // Show the REAL error in the alert
+            alert(`Detailed Error: ${error.message}`);
+            return `Failed: ${error.message}`;
+        }
+    }
+        // --- HELPERS (Defined before use) ---
+        function escapeHtml(text) {
+            if (!text) return text;
+            if (typeof text !== 'string') return String(text);
+            return text
+                .replace(/&/g, "&")
+                .replace(/</g, "<")
+                .replace(/>/g, ">")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "'");
+        }
+        
+        async function fetchWithBackoff(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok && response.status === 429) { throw new Error('Rate limit exceeded'); }
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // --- NEW DATABASE LOGIC: Separate Documents ---
+        // We use 'setDoc' with a generated ID for new items to avoid the 1MB limit of single-doc arrays
+
+        async function saveItem(collName, item) {
+            if (!db || !userId || userId === 'guest') {
+                window.showAlert("Database not connected or Offline Mode. Cannot save.");
+                return;
+            }
+            try {
+                // Path: /artifacts/{appId}/users/{userId}/{collName}/{itemId}
+                const itemRef = doc(db, 'artifacts', appId, 'users', userId, collName, item.id);
+                await setDoc(itemRef, item);
+            } catch(e) {
+                console.error("Firestore Save Error:", e);
+                window.showAlert("Failed to save to database. Check internet.");
+                throw e; 
+            }
+        }
+
+        async function deleteItem(collName, itemId) {
+             if (!db || !userId) return;
+             try {
+                 const itemRef = doc(db, 'artifacts', appId, 'users', userId, collName, itemId);
+                 await deleteDoc(itemRef);
+             } catch(e) {
+                 console.error("Delete Error", e);
+                 window.showAlert("Could not delete item.");
+             }
+        }
+
+        function setupListeners() {
+            if (!db || !userId) return;
+            
+            // Listener for Notes
+            onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'elder_notes'), (snap) => {
+                window.AppState.notes = snap.docs.map(d => d.data());
+                renderNotes();
+            });
+
+            // Listener for Medicine
+            onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'medicine_scans'), (snap) => {
+                window.AppState.medicineScans = snap.docs.map(d => d.data());
+                renderMeds();
+            });
+
+            // Listener for Contacts
+            onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'medical_contacts'), (snap) => {
+                window.AppState.contacts = snap.docs.map(d => d.data());
+                renderContacts();
+            });
+
+            // Listener for Reminders
+            onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'medication_reminders'), (snap) => {
+                window.AppState.reminders = snap.docs.map(d => d.data());
+                renderReminders();
+            });
+        }
+
+
+        // --- RENDERING FUNCTIONS (Defined before listeners) ---
+
+        function getCategoryStyle(cat) {
+            const c = (cat || '').toLowerCase().trim();
+            if (c.includes('heart') || c.includes('pressure') || c.includes('blood') || c.includes('cardio') || c.includes('cholesterol') || c.includes('statin') || c.includes('hypertension')) 
+                return { icon: 'fa-heart-pulse', headerBg: 'bg-red-500', iconColor: 'text-red-600', borderColor: 'border-red-200', label: 'Heart & BP (心臟/血壓)' };
+            
+            if (c.includes('pain') || c.includes('relief') || c.includes('fever') || c.includes('headache') || c.includes('migraine') || c.includes('aspirin') || c.includes('ibuprofen') || c.includes('inflammatory')) 
+                return { icon: 'fa-bandage', headerBg: 'bg-orange-500', iconColor: 'text-orange-600', borderColor: 'border-orange-200', label: 'Pain Relief (止痛/發燒)' };
+            
+            if (c.includes('diabetes') || c.includes('insulin') || c.includes('sugar') || c.includes('glucose') || c.includes('metformin')) 
+                return { icon: 'fa-syringe', headerBg: 'bg-blue-500', iconColor: 'text-blue-600', borderColor: 'border-blue-200', label: 'Diabetes (糖尿病)' };
+            
+            if (c.includes('breath') || c.includes('lung') || c.includes('asthma') || c.includes('cold') || c.includes('flu') || c.includes('cough') || c.includes('allergy') || c.includes('sinus') || c.includes('inhaler')) 
+                return { icon: 'fa-lungs', headerBg: 'bg-teal-500', iconColor: 'text-teal-600', borderColor: 'border-teal-200', label: 'Respiratory (呼吸道)' };
+            
+            if (c.includes('brain') || c.includes('nerve') || c.includes('alzheimer') || c.includes('parkinson') || c.includes('seizure') || c.includes('memory') || c.includes('dementia') || c.includes('stroke') || c.includes('neuropathy') || c.includes('epilepsy'))
+                return { icon: 'fa-brain', headerBg: 'bg-violet-500', iconColor: 'text-violet-600', borderColor: 'border-violet-200', label: 'Brain & Nerves (腦部/神經)' };
+
+            if (c.includes('kidney') || c.includes('bladder') || c.includes('renal') || c.includes('urine') || c.includes('urinary') || c.includes('diuretic') || c.includes('prostate'))
+                return { icon: 'fa-water', headerBg: 'bg-sky-500', iconColor: 'text-sky-600', borderColor: 'border-sky-200', label: 'Kidney (腎臟/泌尿)' };
+
+            if (c.includes('thyroid') || c.includes('hormone') || c.includes('endocrine') || c.includes('levothyroxine'))
+                return { icon: 'fa-dna', headerBg: 'bg-rose-500', iconColor: 'text-rose-600', borderColor: 'border-rose-200', label: 'Thyroid (甲狀腺/荷爾蒙)' };
+
+            if (c.includes('vitamin') || c.includes('supplement') || c.includes('calcium') || c.includes('iron') || c.includes('magnesium') || c.includes('fish oil')) 
+                return { icon: 'fa-apple-whole', headerBg: 'bg-yellow-400', iconColor: 'text-yellow-600', borderColor: 'border-yellow-200', label: 'Vitamin (維生素/保健)' };
+            
+            if (c.includes('stomach') || c.includes('digest') || c.includes('acid') || c.includes('gastric') || c.includes('reflux') || c.includes('laxative') || c.includes('probiotic')) 
+                return { icon: 'fa-utensils', headerBg: 'bg-purple-500', iconColor: 'text-purple-600', borderColor: 'border-purple-200', label: 'Stomach (腸胃)' };
+
+            if (c.includes('antibiotic') || c.includes('infection') || c.includes('bacterial') || c.includes('penicillin') || c.includes('amoxicillin') || c.includes('virus'))
+                return { icon: 'fa-shield-virus', headerBg: 'bg-emerald-500', iconColor: 'text-emerald-600', borderColor: 'border-emerald-200', label: 'Antibiotic (抗生素)' };
+
+            if (c.includes('eye') || c.includes('vision') || c.includes('glaucoma') || c.includes('drops') || c.includes('optic'))
+                return { icon: 'fa-eye', headerBg: 'bg-cyan-500', iconColor: 'text-cyan-600', borderColor: 'border-cyan-200', label: 'Eye Care (眼科)' };
+
+            if (c.includes('sleep') || c.includes('insomnia') || c.includes('anxiety') || c.includes('depression') || c.includes('mood') || c.includes('calm') || c.includes('sedative'))
+                return { icon: 'fa-moon', headerBg: 'bg-indigo-500', iconColor: 'text-indigo-600', borderColor: 'border-indigo-200', label: 'Sleep & Mood (睡眠/情緒)' };
+
+            if (c.includes('bone') || c.includes('joint') || c.includes('arthritis') || c.includes('osteoporosis') || c.includes('muscle'))
+                return { icon: 'fa-bone', headerBg: 'bg-stone-500', iconColor: 'text-stone-600', borderColor: 'border-stone-200', label: 'Bone & Joint (骨骼/關節)' };
+
+            if (c.includes('skin') || c.includes('derm') || c.includes('rash') || c.includes('cream') || c.includes('ointment') || c.includes('topical'))
+                return { icon: 'fa-hand-sparkles', headerBg: 'bg-pink-500', iconColor: 'text-pink-600', borderColor: 'border-pink-200', label: 'Skin Care (皮膚)' };
+            
+            return { icon: 'fa-pills', headerBg: 'bg-slate-500', iconColor: 'text-slate-600', borderColor: 'border-slate-200', label: 'Medicine (一般藥物)' };
+        }
+
+        function renderNotes() {
+            const el = document.getElementById('saved-notes-list');
+            if (!el) return;
+            if (el) el.innerHTML = window.AppState.notes.map(n => `
+                <div class="rounded-3xl bg-white border-2 border-amber-200 shadow-lg mb-6 overflow-hidden">
+                    <div class="bg-amber-500 p-4 flex items-center justify-between text-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md">
+                                <i class="fas fa-user-doctor text-amber-600 text-2xl"></i>
+                            </div>
+                            <span class="font-extrabold text-xl tracking-wide">${escapeHtml(n.location || 'Doctor Note')}</span>
+                        </div>
+                        <button onclick="initiateDelete('elder_notes', '${n.id}')" class="bg-white/20 hover:bg-white/40 p-2 rounded-full text-white transition-colors">
+                            <i class="fas fa-trash fa-lg"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-5">
+                        <div class="mb-4 pb-4 border-b border-gray-100">
+                            <div class="inline-flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full mb-3">
+                                <i class="far fa-calendar-alt text-gray-500"></i>
+                                <p class="text-sm font-semibold text-gray-600">${new Date(n.date).toLocaleDateString()}</p>
+                            </div>
+                            
+                            <!-- Summary Section -->
+                            ${n.summary ? `
+                            <div class="mb-3">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">AI Analysis</p>
+                                <p class="text-gray-800 font-bold text-xl leading-relaxed">${escapeHtml(n.summary)}</p>
+                            </div>
+                            ` : ''}
+
+                            <!-- Full Text Section (Optional view) -->
+                            <!-- Hidden for now as user asked not to emphasize recorded text -->
+                        </div>
+
+                        <!-- Audio Control Panel Container -->
+                        <div id="speech-controls-${n.id}" class="mt-4">
+                            <button onclick="initSpeech('${n.id}', 'note')" class="w-full bg-white text-amber-600 font-bold py-4 rounded-xl border-2 border-amber-200 shadow-sm flex items-center justify-center gap-3 active:scale-95 transition-transform hover:bg-amber-50">
+                                <i class="fas fa-volume-up text-2xl"></i> <span class="text-lg">Play Original Recording</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<div class="text-center py-12 opacity-50"><i class="fas fa-sticky-note text-7xl mb-4 text-gray-300"></i><p class="text-2xl text-gray-400 font-bold">No notes yet</p></div>';
+        }
+
+        // --- DATA: DEFAULT CONTACTS (HK SPECIFIC) ---
+        const DEFAULT_CONTACTS_DATA = [
+            { id: 'def-1', name: '香港紅十字會', role: '陪診服務', phone: '2507 7135' },
+            { id: 'def-2', name: '聖雅各福群會', role: '長者陪診服務', phone: '2835 4321' },
+            { id: 'def-3', name: '仁愛堂', role: '醫療陪診服務', phone: '2655 7711' },
+            { id: 'def-4', name: '保良局', role: '長者陪診服務', phone: '2277 8888' },
+            { id: 'def-5', name: '東華三院', role: '醫療陪診支援計劃', phone: '2548 7111' },
+            { id: 'def-6', name: '香港基督教女青年會', role: '陪診義工服務', phone: '3476 1340' },
+            { id: 'def-7', name: '明愛', role: '長者陪診支援服務', phone: '3589 2300' },
+            { id: 'def-8', name: '協康會', role: '陪診照顧服務', phone: '2784 7000' },
+            { id: 'def-9', name: '優健陪診服務', role: '私營專業陪診', phone: '3705 2760' },
+            { id: 'def-10', name: '香港復康會', role: '陪診安排服務', phone: '2817 8154' }
+        ];
+
+        function renderContacts() {
+            const el = document.getElementById('contacts-list');
+            if (!el) return;
+            const userContacts = window.AppState.contacts || [];
+            let displayMap = new Map();
+            DEFAULT_CONTACTS_DATA.forEach(c => {
+                displayMap.set(c.id, { ...c, isDefault: true });
+            });
+            userContacts.forEach(c => {
+                if (c.id.startsWith('def-')) {
+                    displayMap.set(c.id, { ...c, isDefault: true });
+                } else {
+                    displayMap.set(c.id, { ...c, isDefault: false });
+                }
+            });
+            const finalContacts = Array.from(displayMap.values());
+            if (finalContacts.length === 0) {
+                el.innerHTML = '<div class="text-center py-8 opacity-50"><i class="fas fa-address-book text-6xl mb-4 text-blue-300"></i><p class="text-xl text-gray-500">No contacts</p></div>';
+                return;
+            }
+            el.innerHTML = finalContacts.map(c => `
+                <div class="flex items-center justify-between p-5 ${c.isDefault ? 'bg-purple-50 border-purple-200' : 'bg-blue-50 border-blue-400'} rounded-2xl border-l-8 shadow-sm mb-4">
+                    <div>
+                        <div class="font-bold ${c.isDefault ? 'text-purple-900' : 'text-blue-900'} text-xl flex items-center gap-2">
+                            ${escapeHtml(c.name)}
+                            ${c.isDefault ? '<span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Default</span>' : ''}
+                        </div>
+                        <div class="text-base ${c.isDefault ? 'text-purple-600' : 'text-blue-600'} font-semibold mb-1">${escapeHtml(c.role)}</div>
+                        <div class="text-lg text-gray-700 font-bold flex items-center">
+                            <i class="fas fa-phone-alt text-gray-400 mr-2"></i> ${escapeHtml(c.phone)}
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <a href="tel:${escapeHtml(c.phone)}" class="bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-phone text-2xl"></i></a>
+                        ${!c.isDefault ? `
+                        <button onclick="editContact('${c.id}')" class="bg-yellow-400 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform active:scale-95 transition-transform"><i class="fas fa-pen text-2xl"></i></button>
+                        ` : ''}
+                        ${!c.isDefault ? `
+                            <button onclick="initiateDelete('medical_contacts', '${c.id}')" class="text-red-400 p-3 hover:bg-white rounded-full"><i class="fas fa-trash fa-lg"></i></button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderReminders() {
+            const el = document.getElementById('reminders-list');
+            if (!el) return;
+            if(el) el.innerHTML = window.AppState.reminders.map(r => `
+                <div class="flex items-center justify-between p-5 bg-indigo-50 rounded-2xl border-l-8 border-indigo-400 shadow-sm mb-4">
+                    <div>
+                        <div class="font-bold text-indigo-900 text-xl">${escapeHtml(r.name)}</div>
+                        <div class="text-lg text-indigo-600 font-semibold mt-1"><i class="fas fa-clock"></i> ${escapeHtml(r.time)}</div>
+                    </div>
+                    <button onclick="initiateDelete('medication_reminders', '${r.id}')" class="text-red-400 p-3 hover:bg-white rounded-full"><i class="fas fa-trash fa-lg"></i></button>
+                </div>
+            `).join('') || '<div class="text-center py-8 opacity-50"><i class="fas fa-bell text-6xl mb-4 text-indigo-300"></i><p class="text-xl text-gray-500">No reminders</p></div>';
+        }
+
+        // --- PLAYER & SPEECH LOGIC ---
+        
+        window.initSpeech = (id, type) => {
+            // STOP old instance
+            stopSpeech(window.AppState.currentSpeechId);
+            
+            // RESET state
+            window.AppState.currentSpeechId = id;
+            window.AppState.isDragging = false;
+            window.AppState.speechCharIndex = 0;
+
+            let isAudioFile = false;
+            let srcOrText = "";
+            let btnColor, barColor;
+
+            if (type === 'note') {
+                const note = window.AppState.notes.find(n => n.id === id);
+                if (note && note.audioBase64) {
+                    isAudioFile = true;
+                    srcOrText = note.audioBase64;
+                } else if (note) {
+                    // Fallback to TTS if no audio file
+                    srcOrText = note.transcribedText || note.summary || "No audio";
+                }
+                btnColor = 'bg-amber-600 hover:bg-amber-700';
+                barColor = 'bg-amber-600';
+            } else {
+                // Meds are always TTS
+                const med = window.AppState.medicineScans.find(s => s.id === id);
+                if (med) srcOrText = med.summary || "No text";
+                btnColor = 'bg-blue-600 hover:bg-blue-700';
+                barColor = 'bg-blue-600';
+            }
+
+            // Render UI
+            const container = document.getElementById(`speech-controls-${id}`);
+            if(!container) return;
+            
+            container.innerHTML = `
+                <div class="bg-gray-100 rounded-2xl p-4 mt-4 border-2 border-gray-200">
+                    <div class="mb-4 relative group px-2">
+                        <div class="h-2 w-full bg-gray-300 rounded-lg absolute top-1/2 transform -translate-y-1/2 pointer-events-none"></div>
+                        <div id="progress-fill-${id}" class="h-2 ${barColor} rounded-lg absolute top-1/2 transform -translate-y-1/2 pointer-events-none" style="width: 0%"></div>
+                        <input type="range" id="speech-slider-${id}" min="0" max="100" value="0" 
+                            class="w-full h-6 opacity-0 cursor-pointer absolute top-1/2 transform -translate-y-1/2 z-10"
+                            oninput="handleSeekInput('${id}')" 
+                            onchange="handleSeekChange('${id}', this.value)">
+                        <div id="progress-thumb-${id}" class="w-6 h-6 ${barColor} rounded-full shadow-md absolute top-1/2 transform -translate-y-1/2 -ml-3 pointer-events-none transition-transform" style="left: 0%"></div>
+                    </div>
+                    <div class="flex items-center justify-center gap-8 mt-6">
+                        <button onclick="seekSpeech(0)" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fas fa-undo text-2xl"></i></button>
+                        <button id="btn-play-pause-${id}" onclick="toggleSpeech()" class="w-16 h-16 ${btnColor} text-white rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform"><i class="fas fa-pause text-2xl"></i></button>
+                        <button onclick="stopSpeech('${id}', '${type}')" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times text-2xl"></i></button>
+                    </div>
+                    <div class="text-center mt-3 text-sm text-gray-500 font-bold tracking-wide" id="speech-status-${id}">Playing...</div>
+                </div>
+            `;
+
+            if (isAudioFile) {
+                window.AppState.playerMode = 'audio';
+                window.AppState.audioElem = new Audio(srcOrText);
+                
+                const aud = window.AppState.audioElem;
+                aud.onended = () => stopSpeech(id, type);
+                aud.ontimeupdate = () => {
+                    if(!window.AppState.isDragging) {
+                        const pct = (aud.currentTime / aud.duration) * 100 || 0;
+                        updateProgressBar(pct);
+                    }
+                };
+                aud.play().catch(e => console.error("Play error", e));
+            } else {
+                window.AppState.playerMode = 'tts';
+                window.AppState.speechText = srcOrText;
+                speakText(0);
+            }
+        };
+
+        function speakText(startIndex = 0) {
+            window.speechSynthesis.cancel();
+            const text = window.AppState.speechText;
+            const chunk = text.substring(startIndex);
+            if (!chunk) return;
+            
+            const u = new SpeechSynthesisUtterance(chunk);
+            u.lang = 'zh-HK';
+            u.rate = 0.9;
+            u.onboundary = (e) => {
+                if (!window.AppState.isDragging) {
+                    window.AppState.speechCharIndex = startIndex + e.charIndex;
+                    updateProgressBar((window.AppState.speechCharIndex / text.length) * 100);
+                }
+            };
+            u.onend = () => {
+                if (window.AppState.speechCharIndex >= text.length - 10) stopSpeech(window.AppState.currentSpeechId, 'med'); // Simplification
+            };
+            window.AppState.speechUtterance = u;
+            window.speechSynthesis.speak(u);
+            updatePlayButton(true);
+        }
+
+        function updateProgressBar(percent) {
+            const id = window.AppState.currentSpeechId;
+            if(!id) return;
+            const fill = document.getElementById(`progress-fill-${id}`);
+            const thumb = document.getElementById(`progress-thumb-${id}`);
+            const slider = document.getElementById(`speech-slider-${id}`);
+            if(fill) fill.style.width = `${percent}%`;
+            if(thumb) thumb.style.left = `${percent}%`;
+            if(slider && !window.AppState.isDragging) slider.value = percent;
+        }
+
+        window.toggleSpeech = () => {
+            if (window.AppState.playerMode === 'audio') {
+                const aud = window.AppState.audioElem;
+                if (aud.paused) { aud.play(); updatePlayButton(true); }
+                else { aud.pause(); updatePlayButton(false); }
+            } else {
+                if (window.speechSynthesis.speaking) {
+                    if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); updatePlayButton(true); }
+                    else { window.speechSynthesis.pause(); updatePlayButton(false); }
+                } else {
+                    speakText(window.AppState.speechCharIndex);
+                }
+            }
+        };
+
+        function updatePlayButton(isPlaying) {
+            const id = window.AppState.currentSpeechId;
+            const btn = document.getElementById(`btn-play-pause-${id}`);
+            const status = document.getElementById(`speech-status-${id}`);
+            if(btn) btn.innerHTML = isPlaying ? '<i class="fas fa-pause text-2xl"></i>' : '<i class="fas fa-play text-2xl pl-1"></i>';
+            if(status) status.innerText = isPlaying ? "Playing..." : "Paused";
+        }
+
+        window.handleSeekInput = (id) => {
+            window.AppState.isDragging = true;
+            if(window.AppState.playerMode === 'audio') window.AppState.audioElem.pause();
+            else window.speechSynthesis.pause();
+            
+            const slider = document.getElementById(`speech-slider-${id}`);
+            updateProgressBar(slider.value);
+        };
+
+        window.handleSeekChange = (id, percent) => {
+            window.AppState.isDragging = false;
+            seekSpeech(percent);
+        };
+
+        window.seekSpeech = (percent) => {
+            if(window.AppState.playerMode === 'audio') {
+                const aud = window.AppState.audioElem;
+                aud.currentTime = (percent / 100) * aud.duration;
+                aud.play();
+                updatePlayButton(true);
+            } else {
+                const index = Math.floor((percent / 100) * window.AppState.speechText.length);
+                window.AppState.speechCharIndex = index;
+                speakText(index);
+            }
+        };
+
+        window.stopSpeech = (id, type) => {
+            if (!id) return;
+            if (window.AppState.playerMode === 'audio' && window.AppState.audioElem) {
+                window.AppState.audioElem.pause();
+                window.AppState.audioElem = null;
+            } else {
+                window.speechSynthesis.cancel();
+            }
+            window.AppState.currentSpeechId = null;
+
+            const container = document.getElementById(`speech-controls-${id}`);
+            if (container) {
+                const btnColor = type === 'note' ? 'text-amber-600 border-amber-200 hover:bg-amber-50' : 'text-blue-600 border-blue-200 hover:bg-blue-50';
+                const txt = type === 'note' ? 'Play Original Recording' : '讀出指示 (Read Aloud)';
+                container.innerHTML = `<button onclick="initSpeech('${id}', '${type}')" class="w-full bg-white ${btnColor} font-bold py-4 rounded-xl border-2 shadow-sm flex items-center justify-center gap-3 active:scale-95 transition-transform"><i class="fas fa-volume-up text-2xl"></i> <span class="text-lg">${txt}</span></button>`;
+            }
+        };
+
+        // --- DELETE LOGIC ---
+        let deleteTarget = null;
+
+        window.initiateDelete = (coll, itemId) => {
+            deleteTarget = { coll, itemId };
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        };
+
+        window.executeDelete = async () => {
+            if (!deleteTarget) return;
+            document.getElementById('confirm-modal').classList.add('hidden');
+            
+            const { coll, itemId } = deleteTarget;
+            await deleteItem(coll, itemId);
+            deleteTarget = null;
+        };
+
+
+        // --- RECORDING ---
+        
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                window.AppState.mediaRecorder = new MediaRecorder(stream);
+                window.AppState.audioChunks = [];
+                
+                window.AppState.mediaRecorder.ondataavailable = e => window.AppState.audioChunks.push(e.data);
+                
+                window.AppState.mediaRecorder.onstop = () => {
+                    const blob = new Blob(window.AppState.audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        window.AppState.currentAudioBase64 = reader.result;
+                        // NOW we auto-finalize
+                        finalizeRecording();
+                    };
+                    reader.readAsDataURL(blob);
+                };
+                
+                window.AppState.mediaRecorder.start();
+                return true;
+            } catch(e) {
+                console.error("Audio Rec Error", e);
+                return false;
+            }
+        }
+
+        window.toggleRecord = async () => {
+            if (!('webkitSpeechRecognition' in window)) return window.showAlert("Browser does not support speech.");
+            
+            const btn = document.getElementById('record-btn');
+
+            if(window.AppState.isRecording) {
+                // USER CLICKED STOP - FINALIZE EVERYTHING
+                window.AppState.isRecording = false; 
+                
+                if(window.AppState.recognition) {
+                    window.AppState.recognition.onend = null; // Prevent auto-restart when manually stopping
+                    window.AppState.recognition.stop();
+                }
+                
+                if(window.AppState.mediaRecorder && window.AppState.mediaRecorder.state !== 'inactive') {
+                    window.AppState.mediaRecorder.stop();
+                    // Note: finalizeRecording() will be called in mediaRecorder.onstop
+                    // also stop tracks
+                    window.AppState.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+                } else {
+                     // If no media recorder active but text captured, manual finalize
+                     finalizeRecording();
+                }
+                
+                btn.innerHTML = '<i class="fas fa-microphone text-3xl"></i> Start Recording';
+                btn.classList.replace('btn-danger', 'btn-primary');
+                
+                // Show analyzing UI immediately
+                document.getElementById('notes-summary-output').value = "Analyzing your note...";
+                
+            } else {
+                // START RECORDING
+                // Reset state
+                document.getElementById('notes-text-output').value = "";
+                document.getElementById('notes-summary-output').value = "Listening...";
+                
+                const success = await startRecording();
+                if(!success) return window.showAlert("Mic Access Denied");
+
+                // Start Speech Recognition
+                startSpeechReco();
+                
+                window.AppState.isRecording = true;
+                btn.innerHTML = '<i class="fas fa-stop text-3xl"></i> Stop Recording';
+                btn.classList.replace('btn-primary', 'btn-danger');
+            }
+        };
+
+        function startSpeechReco() {
+            try {
+                const rec = new webkitSpeechRecognition();
+                rec.continuous = true; 
+                rec.interimResults = true; 
+                rec.lang = document.getElementById('notes-lang-select').value;
+                
+                rec.onresult = (e) => {
+                    let final = '';
+                    let interim = '';
+                    for (let i = e.resultIndex; i < e.results.length; ++i) {
+                        if (e.results[i].isFinal) final += e.results[i][0].transcript;
+                        else interim += e.results[i][0].transcript;
+                    }
+                    if(final) {
+                        const output = document.getElementById('notes-text-output');
+                        output.value += final + ' ';
+                    }
+                    // Live Update in the Summary Box (Visual Feedback)
+                    const fullTextSoFar = document.getElementById('notes-text-output').value + interim;
+                    document.getElementById('notes-summary-output').value = fullTextSoFar || "Listening...";
+                };
+
+                // CRITICAL FIX: Restart on end if still recording
+                rec.onend = () => {
+                    if (window.AppState.isRecording) {
+                        console.log("Reco ended, restarting...");
+                        startSpeechReco(); 
+                    }
+                };
+                
+                rec.start();
+                window.AppState.recognition = rec;
+            } catch(e) {
+                console.error("Reco Start Error", e);
+            }
+        }
+        
+        async function finalizeRecording() {
+            // Called when media recorder stops (user pressed stop)
+            const txt = document.getElementById('notes-text-output').value;
+            
+            if(!txt && !window.AppState.currentAudioBase64) {
+                 document.getElementById('notes-summary-output').value = "";
+                 return window.showAlert("Nothing recorded.");
+            }
+
+            // AUTO-ANALYZE
+            document.getElementById('notes-summary-output').value = "Generating Summary...";
+            try {
+                const prompt = `Analyze and summarize the recorded text. Focus on analyzing the key points in the dialogue about the sickness or current situation said by the doctor. Provide the result in Traditional Chinese. Text: "${txt}"`;
+                const systemPrompt = "You are a medical assistant helping an elderly patient understand their doctor's advice.";
+                const summary = await callAI(prompt, systemPrompt);
+                
+                // INSTEAD OF SAVING: Display result for review
+                document.getElementById('notes-summary-output').value = summary;
+
+            } catch(e) {
+                console.error(e);
+                // Fallback
+                 document.getElementById('notes-summary-output').value = "Analysis failed. You can still save the recording.";
+            }
+        }
+
+        async function saveNote() {
+             const txt = document.getElementById('notes-text-output').value; 
+             const sum = document.getElementById('notes-summary-output').value; 
+             const audio = window.AppState.currentAudioBase64;
+             
+             if(!txt && !sum && !audio) return window.showAlert("Nothing to save.");
+             
+             let finalSum = sum;
+             if (sum === "Listening..." || sum === "Generating Summary..." || sum === "Analyzing your note...") {
+                 finalSum = txt; // Fallback to raw text
+             }
+
+            // SAVE AS INDIVIDUAL DOCUMENT
+             await saveItem('elder_notes', {
+                id: Date.now().toString(), 
+                location: document.getElementById('notes-input-location').value || 'Doctor Note', 
+                transcribedText: txt, 
+                summary: finalSum, 
+                audioBase64: audio,
+                date: new Date().toISOString()
+            });
+
+            document.getElementById('notes-text-output').value = '';
+            document.getElementById('notes-summary-output').value = '';
+            document.getElementById('notes-input-location').value = '';
+            window.AppState.currentAudioBase64 = null;
+            window.showAlert("Note Processed & Saved!");
+        };
+
+        // ... (Keep existing camera/contacts logic unchanged) ...
+        window.openTransport = () => {
+            const dest = document.getElementById('transport-dest').value;
+            if(!dest) return window.showAlert("Please enter a destination.");
+            const btn = document.querySelector('#view-transport button'); 
+            const originalIcon = btn.innerHTML; 
+            btn.innerText = "Locating...";
+            btn.disabled = true;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit&origin=${pos.coords.latitude},${pos.coords.longitude}`;
+                        window.open(url, '_blank');
+                        setTimeout(() => { btn.innerHTML = originalIcon; btn.disabled = false; }, 1000);
+                    },
+                    (err) => {
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`, '_blank');
+                        setTimeout(() => { btn.innerHTML = originalIcon; btn.disabled = false; }, 1000);
+                    }
+                );
+            } else {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=transit`, '_blank');
+                setTimeout(() => { btn.innerHTML = originalIcon; btn.disabled = false; }, 1000);
+            }
+        };
+
+        window.openUber = () => {
+            const dest = document.getElementById('transport-dest').value;
+            if(!dest) return window.showAlert("Please enter a destination.");
+            window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=${encodeURIComponent(dest)}`, '_blank');
+        };
+
+        async function callAI(prompt, system) {
+            const key = (window.AppState.geminiApiKey || apiKey || "").trim();
+            if(!key) { window.showAlert("Please add API Key in code."); return "Error: API Key Missing"; }
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
+                const resp = await fetchWithBackoff(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error?.message || "AI Error");
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { window.showAlert(`AI Error: ${e.message}`); return "Error."; }
+        }
+
+        // --- NEW: CALL AI WITH DUAL IMAGES ---
+        async function callAIVisionDual(labelBase64, appearanceBase64) {
+            let key = window.AppState.geminiApiKey || apiKey;
+            if(!key) key = localStorage.getItem('gemini_api_key'); // Backup check
+            key = (key || "").trim();
+
+            if(!key) throw new Error("Please set API Key in code.");
+            
+            const prompt = `Analyze these two images of a medicine. 
+            - Image 1 is the PACKAGE LABEL. Use it to read the text and name.
+            - Image 2 is the PILL/BOTTLE APPEARANCE. Use it to describe what it looks like.
+            
+            Tasks:
+            1. Identify the Medicine Name (from Label).
+            2. Extract key usage instructions (from Label).
+            3. Verify if the appearance matches typical traits for this med (from Appearance image).
+            4. Classify into one CATEGORY: Heart, Diabetes, Pain, Respiratory, Stomach, Vitamin, Antibiotic, Eye, Sleep, Bone, Skin, Brain, Kidney, Thyroid, Other.
+            5. Provide a simple, elderly-friendly explanation in Traditional Chinese (繁體中文).
+            
+            Format exactly like this:
+            CORRECTED_LABEL: [Name]
+            CATEGORY: [Category]
+            EXPLANATION: [Explanation including appearance check]`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
+            
+            const parts = [{ text: prompt }];
+
+            if (labelBase64) {
+                parts.push({ inline_data: { mime_type: "image/jpeg", data: labelBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") } });
+            }
+            if (appearanceBase64) {
+                parts.push({ inline_data: { mime_type: "image/jpeg", data: appearanceBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") } });
+            }
+
+            const body = { contents: [{ parts: parts }] };
+
+            const resp = await fetchWithBackoff(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error?.message || "AI Error");
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        window.summarizeNote = async () => {
+            const txt = document.getElementById('notes-text-output').value;
+            if(!txt) return window.showAlert("Please enter text.");
+            document.getElementById('notes-summary-output').value = "Thinking...";
+            const res = await callAI(`Summarize: ${txt}`, "You are an elderly care assistant. Summarize clearly in Traditional Chinese.");
+            document.getElementById('notes-summary-output').value = res;
+        };
+
+        window.getMoodTip = async function(mood) {
+        const resultBox = document.getElementById('mood-result');
+        resultBox.innerText = `Thinking about advice for feeling ${mood}...`;
+        
+        // Securely ask the backend
+        const prompt = `I am an elderly person feeling ${mood}. Give me one short, warm sentence of advice or comfort.`;
+        const response = await askBackendAI(prompt);
+        
+        resultBox.innerText = response;
+    };
+
+        window.startCam = async (type) => {
+            if (!type) return;
+            window.AppState.scanningType = type;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                const video = document.getElementById('video-feed');
+                video.srcObject = stream;
+                video.play();
+                document.getElementById('video-container').classList.remove('hidden');
+                document.getElementById('capture-btn').classList.remove('hidden');
+                document.getElementById('scan-controls').classList.add('hidden');
+                document.getElementById('start-camera-btn').classList.add('hidden');
+                document.getElementById('analyze-btn').classList.add('hidden');
+                
+                // Update Overlay Text based on Type
+                const badge = document.getElementById('scan-instruction-text');
+                const overlay = document.getElementById('scan-overlay-box');
+                if (type === 'label') {
+                    badge.innerText = "Scan Label";
+                    overlay.style.borderColor = "white";
+                } else if (type === 'appearance') {
+                    badge.innerText = "Scan Appearance";
+                    overlay.style.borderColor = "#3b82f6"; // blue
+                }
+                
+            } catch(e) { window.showAlert("Camera error: " + e.message); }
+        };
+
+        // IMAGE RESIZING HELPER
+        function resizeImage(base64Str, maxWidth = 800) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = base64Str;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxWidth) {
+                            width *= maxWidth / height;
+                            height = maxWidth;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // Moderate quality
+                };
+            });
+        }
+
+        window.captureScan = async () => {
+            const video = document.getElementById('video-feed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            let imageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+            
+            // Resize immediately
+            imageBase64 = await resizeImage(imageBase64);
+            
+            const type = window.AppState.scanningType;
+            
+            if (type === 'label') {
+                // 1. SAVE LABEL
+                window.AppState.currentLabelImg = imageBase64;
+                const prev = document.getElementById('preview-label');
+                prev.innerHTML = `<img src="${imageBase64}" class="w-full h-full object-cover">`;
+                prev.classList.replace('bg-gray-100', 'bg-white');
+                
+                // 2. AUTO-SWITCH TO APPEARANCE
+                // Don't stop camera. Just update state and UI.
+                window.AppState.scanningType = 'appearance';
+                const badge = document.getElementById('scan-instruction-text');
+                const overlay = document.getElementById('scan-overlay-box');
+                badge.innerText = "Now Scan Appearance";
+                overlay.style.borderColor = "#3b82f6"; // Blue to indicate change
+                
+                // Optional: visual flash or sound could be added here
+                
+            } else if (type === 'appearance') {
+                // 1. SAVE APPEARANCE
+                window.AppState.currentAppearanceImg = imageBase64;
+                const prev = document.getElementById('preview-appearance');
+                prev.innerHTML = `<img src="${imageBase64}" class="w-full h-full object-cover">`;
+                prev.classList.replace('bg-gray-100', 'bg-white');
+
+                // 2. STOP CAMERA
+                video.srcObject.getTracks().forEach(t => t.stop());
+                document.getElementById('video-container').classList.add('hidden');
+                document.getElementById('capture-btn').classList.add('hidden');
+                
+                // Show thumbnails again
+                document.getElementById('scan-controls').classList.remove('hidden');
+                document.getElementById('analyze-btn').classList.remove('hidden'); // Show analyze btn just in case
+                
+                // 3. AUTO-ANALYZE
+                analyzeDualImages();
+            }
+        };
+
+        // ==========================================
+    // 2. FEATURE: Medicine Scanner (Secure)
+    // ==========================================
+    window.analyzeDualImages = async function() {
+        // 1. Check if we have the Label Image (Most important)
+        if (!window.AppState.currentLabelImg) {
+            alert("Please scan the medicine label first!");
+            return;
+        }
+
+        // 2. Show "Thinking..." status
+        const outputBox = document.getElementById('ocr-summary-output');
+        const nameBox = document.getElementById('ocr-output');
+        
+        outputBox.value = "Analyzing label with Secure AI... please wait...";
+        nameBox.value = "Scanning...";
+
+        // 3. Define the prompt
+        const prompt = `
+            Analyze this medicine label image.
+            1. Identify the MEDICINE NAME.
+            2. Identify the DOSAGE (e.g. 50mg).
+            3. Explain its PURPOSE in 1 simple sentence for an elderly person.
+            4. List any major WARNINGS.
+            
+            Format:
+            Name: [Name]
+            Dosage: [Dosage]
+            Purpose: [Purpose]
+            Warnings: [Warnings]
+        `;
+
+        // 4. Send to your Secure Server (using the Label Image)
+        // We use 'currentLabelImg' which is the File/Blob object from the camera
+        const aiResponse = await askBackendAI(prompt, window.AppState.currentLabelImg);
+
+        // 5. Display Results
+        if (aiResponse) {
+            outputBox.value = aiResponse;
+            
+            // Try to auto-extract the name to put in the Title box
+            const nameMatch = aiResponse.match(/Name:\s*(.+)/i);
+            if (nameMatch && nameMatch[1]) {
+                nameBox.value = nameMatch[1].replace(/\*/g, '').trim();
+            }
+        } else {
+            outputBox.value = "Error: Could not analyze. Please try again.";
+        }
+    }
+        
+        window.saveScan = async () => {
+            const btn = document.getElementById('btn-save-scan');
+            if(btn) { btn.innerText = "Saving..."; btn.disabled = true; }
+            
+            try {
+                const ocr = document.getElementById('ocr-output').value;
+                const sum = document.getElementById('ocr-summary-output').value;
+                const cat = document.getElementById('ocr-category-input').value;
+                // Ensure we use the current in-memory images, RESIZED previously
+                const labelImg = window.AppState.currentLabelImg;
+                const appImg = window.AppState.currentAppearanceImg;
+
+                if (!ocr && !sum) throw new Error("Nothing to save.");
+
+                // SAVE AS INDIVIDUAL DOC TO AVOID LIMIT
+                await saveItem('medicine_scans', {
+                    id: Date.now().toString(),
+                    ocrText: ocr,
+                    summary: sum,
+                    category: cat,
+                    date: new Date().toISOString(),
+                    labelImage: labelImg,
+                    appearanceImage: appImg
+                });
+
+                window.showAlert("Medicine Saved!");
+                window.clearScan();
+            } catch(e) {
+                window.showAlert("Error saving: " + e.message);
+            } finally {
+                if(btn) { btn.innerText = "Save Info"; btn.disabled = false; }
+            }
+        };
+        
+        window.clearScan = () => {
+             window.AppState.currentLabelImg = null;
+             window.AppState.currentAppearanceImg = null;
+             document.getElementById('preview-label').innerHTML = '<span class="text-gray-400 font-bold text-center p-2"><i class="fas fa-file-alt text-3xl mb-1 block"></i>Label</span>';
+             document.getElementById('preview-appearance').innerHTML = '<span class="text-gray-400 font-bold text-center p-2"><i class="fas fa-pills text-3xl mb-1 block"></i>Pill/Look</span>';
+             document.getElementById('video-container').classList.add('hidden');
+             document.getElementById('capture-btn').classList.add('hidden');
+             document.getElementById('scan-controls').classList.remove('hidden');
+             document.getElementById('start-camera-btn').classList.remove('hidden');
+             document.getElementById('analyze-btn').classList.add('hidden');
+             document.getElementById('ocr-output').value = '';
+             document.getElementById('ocr-summary-output').value = '';
+             document.getElementById('ocr-category-display').classList.add('hidden');
+             
+             const video = document.getElementById('video-feed');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
+            }
+        };
+
+        window.addContact = async () => {
+            const name = document.getElementById('c-name').value;
+            const phone = document.getElementById('c-phone').value;
+            const role = document.getElementById('c-role').value;
+            if(!name || !phone) return window.showAlert("Name and Phone required");
+            
+            const btn = document.getElementById('btn-save-contact');
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            try {
+                if (window.AppState.editingContactId) {
+                    // Update existing
+                     // We can't update default, so we essentially create a new user one if ID doesn't exist in user collection
+                     // But simplest is to just overwrite/save
+                     await saveItem('medical_contacts', { id: window.AppState.editingContactId, name, phone, role });
+                     window.cancelEditContact();
+                } else {
+                    // CREATE MODE
+                    await saveItem('medical_contacts', { id: Date.now().toString(), name, phone, role });
+                    document.getElementById('c-name').value = '';
+                    document.getElementById('c-role').value = '';
+                    document.getElementById('c-phone').value = '';
+                }
+                 window.showAlert("Contact Saved");
+            } catch (e) {
+                console.error(e);
+                window.showAlert("Error saving contact.");
+            } finally {
+                btn.innerText = "Add Contact";
+                btn.disabled = false;
+            }
+        };
+        
+        window.addReminder = async () => {
+            const name = document.getElementById('r-name').value;
+            const time = document.getElementById('r-time').value;
+            if(!name || !time) return window.showAlert("Medicine Name and Time required");
+            await saveItem('medication_reminders', { id: Date.now().toString(), name, time });
+            document.getElementById('r-name').value = '';
+            window.showAlert("Reminder Set");
+        };
+
+        window.appLoaded = true;
+        // UI Logic
+        function switchTab(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('view-' + viewId);
+            if(target) target.classList.add('active');
+            
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            const tabBtn = document.getElementById('tab-' + viewId);
+            if(tabBtn) tabBtn.classList.add('active');
+            else {
+                const home = document.getElementById('tab-menu');
+                if(home) home.classList.remove('active'); 
+            }
+            
+            window.scrollTo(0,0);
+        }
+        
+        function showAlert(msg) {
+            const el = document.getElementById('alert-msg');
+            if(el) el.textContent = msg;
+            const modal = document.getElementById('alert-modal');
+            if(modal) modal.classList.remove('hidden');
+            else alert(msg);
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if(el) el.classList.add('hidden');
+        }
+        
+        window.switchTab = switchTab;
+        window.showAlert = showAlert;
+        window.closeModal = closeModal;
+
+        // Ensure DOM is ready before initApp called to prevent "innerHTML of null" errors
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // ==========================================
+    // 3. FEATURE: Voice Note Summarizer (ONLINE)
+    // ==========================================
+    window.analyzeNote = async function() {
+        // 1. Get the text from the box
+        // (We check both ID 'notes-output' and 'notes-summary-output' just in case)
+        const noteBox = document.getElementById('notes-output') || document.getElementById('notes-summary-output');
+        const rawText = noteBox.value;
+
+        if (!rawText || rawText.includes("Your note will appear")) {
+            alert("Please speak or type a note first!");
+            return;
+        }
+
+        // 2. Show "Thinking..." status
+        const outputBox = document.getElementById('notes-summary-output');
+        // If there's no separate summary box, use the main one
+        const targetBox = outputBox || noteBox; 
+        
+        targetBox.value = "AI is summarizing... please wait...";
+
+        // 3. Send to Render Server
+        const prompt = `Summarize this doctor's note or health thought into a simple bullet list for an elderly patient: "${rawText}"`;
+        
+        // This calls the bridge to your Online Server
+        const aiResponse = await askBackendAI(prompt);
+
+        // 4. Show Result
+        if (aiResponse) {
+            targetBox.value = aiResponse;
+        } else {
+            targetBox.value = "Error: Could not connect to server.";
+        }
+    }
+    </script>
+</body>
+</html>
