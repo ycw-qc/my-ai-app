@@ -10,7 +10,8 @@ app.use(express.json({ limit: '10mb' })); // Allows big images
 // Connect to Google using the hidden key
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 // Using 'gemini-1.5-flash' because '2.5' is not fully released yet
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// Try this "Latest" alias, which often bypasses the 404 block
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 app.post('/ask-ai', async (req, res) => {
     try {
@@ -30,5 +31,6 @@ app.post('/ask-ai', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
