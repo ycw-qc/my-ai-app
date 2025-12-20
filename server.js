@@ -23,9 +23,7 @@ app.get('/', (req, res) => {
 // Connect to Google
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
-// Note: Ensure this model name is correct. Currently "gemini-1.5-flash" is the standard.
-// If "2.5" gives you an error, switch it back to "1.5".
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 app.post('/ask-ai', async (req, res) => {
     try {
@@ -50,3 +48,4 @@ app.post('/ask-ai', async (req, res) => {
 // Render assigns a specific port, so we must use process.env.PORT
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
+
